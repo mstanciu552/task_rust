@@ -1,13 +1,14 @@
-#[allow(dead_code)]
+use fltk::{app, prelude::*, window::Window};
 use rusqlite::{Connection, Result};
 
 mod task;
-
 use task::Task;
 
 // TODO Add UI
 
 fn main() -> Result<()> {
+    let app = app::App::default();
+    let mut win = Window::new(100, 100, 400, 300, "Task Tracker");
     let conn = Connection::open("task_rust.db")?;
 
     conn.execute(
@@ -28,6 +29,10 @@ fn main() -> Result<()> {
     for t in tasks {
         println!("{:#?}", t);
     }
+
+    win.end();
+    win.show();
+    app.run().unwrap();
 
     Ok(())
 }
