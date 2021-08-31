@@ -1,10 +1,10 @@
+#[allow(dead_code)]
 use rusqlite::{Connection, Result};
 
 mod task;
 
 use task::Task;
 
-// TODO Add today date
 // TODO Add UI
 
 fn main() -> Result<()> {
@@ -20,14 +20,11 @@ fn main() -> Result<()> {
         [],
     )?;
 
-    let task = Task::new(
-        "Test1".to_string(),
-        "2222-01-01".to_string(),
-        "2222-01-01".to_string(),
-    );
+    let task = Task::new("Test1".to_string(), "2222-01-01".to_string());
+
+    task.insert(&conn)?;
 
     let tasks = task.get(&conn)?;
-
     for t in tasks {
         println!("{:#?}", t);
     }
