@@ -27,7 +27,7 @@ impl Task {
         Ok(())
     }
 
-    pub fn get(&self, conn: &Connection) -> Result<Vec<Self>> {
+    pub fn get(conn: &Connection) -> Result<Vec<Self>> {
         let mut stmt = conn.prepare("select * from Task")?;
         let res = stmt.query_map([], |row| {
             Ok(Self {
@@ -45,6 +45,19 @@ impl Task {
         }
 
         Ok(tasks)
+    }
+
+    pub fn convert(tasks: Vec<Self>) -> Result<Vec<String>> {
+        let mut tasks_str: Vec<String> = Vec::new();
+
+        for t in tasks {
+            tasks_str.push(format!(
+                "{} | {} | {} | {}",
+                t.id, t.desc, t.due_date, t.created_at
+            ));
+        }
+
+        Ok(tasks_str)
     }
 
     pub fn delete(conn: &Connection, id: i32) -> Result<()> {

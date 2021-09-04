@@ -1,15 +1,31 @@
-use fltk::{app, prelude::*, window::Window};
 use rusqlite::{Connection, Result};
+use std::env::args;
+use std::io::*;
 
 mod task;
 use task::Task;
 
 // TODO Add UI
 
+fn read_input() -> Task {
+    let mut desc: String = String::new();
+    println!("Enter Task");
+    stdin()
+        .read_line(&mut desc)
+        .expect("Error reading description");
+
+    let mut due_date: String = String::new();
+    println!("Enter Due Date");
+    stdin()
+        .read_line(&mut due_date)
+        .expect("Error reading due date");
+
+    Task::new(desc, due_date)
+}
+
 fn main() -> Result<()> {
-    let app = app::App::default();
-    let mut win = Window::new(100, 100, 400, 300, "Task Tracker");
     let conn = Connection::open("task_rust.db")?;
+    let arg: String = args().nth(1).unwrap_or(String::new());
 
     conn.execute(
         "create table if not exists Task (
@@ -21,18 +37,20 @@ fn main() -> Result<()> {
         [],
     )?;
 
-    let task = Task::new("Test1".to_string(), "2222-01-01".to_string());
-
-    task.insert(&conn)?;
-
-    let tasks = task.get(&conn)?;
-    for t in tasks {
-        println!("{:#?}", t);
+    match arg.as_str() {
+        "add" => {
+            let task = read_input();
+            task.insert(&conn)?;
+            println!("Task {} added successfully", task.id);
+        }
+        "get" => {
+            let tasks = Task::get(&conn)?;
+            let tasks_str: Vec<String> = Task::convert(tasks)?;
+            println!("{:#?}", tasks_str);
+        }
+        "help" => println!("Help"),
+        _ => println!("Undefined argument!"),
     }
-
-    win.end();
-    win.show();
-    app.run().unwrap();
 
     Ok(())
 }
